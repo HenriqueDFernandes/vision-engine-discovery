@@ -1,8 +1,8 @@
 # Vision Engine Discovery
 
-Repositório criado para registrar a atividade de *Discovery Arquitetural Estrutural* do Vision Engine, utilizando engenharia de prompts para obtenção e refinamento de artefatos arquiteturais baseados em IA.
+Repositório criado para registrar a atividade de *Discovery Arquitetural* do Vision Engine, utilizando engenharia de prompts para obtenção e refinamento de artefatos arquiteturais baseados em IA.
 
-O objetivo do trabalho é transformar uma descrição inicial do sistema em uma representação arquitetural progressivamente refinada, passando por identificação de lacunas, definição de premissas, modelagem de containers e validação das dependências principais do sistema.
+O objetivo do trabalho é transformar uma descrição inicial do sistema em artefatos arquiteturais estruturais e comportamentais progressivamente refinados, passando por identificação de lacunas, definição de premissas, modelagem de containers, validação de dependências e modelagem de fluxos de interação.
 
 ---
 
@@ -11,7 +11,7 @@ O objetivo do trabalho é transformar uma descrição inicial do sistema em uma 
 - Estruturar o conhecimento inicial do produto.
 - Identificar lacunas arquiteturais e decisões ainda não tomadas.
 - Consolidar premissas e limites do sistema.
-- Gerar diagramas arquiteturais de containers.
+- Gerar diagramas arquiteturais estruturais e comportamentais.
 - Comparar diferentes formas de representação arquitetural.
 - Produzir artefatos reutilizáveis para etapas posteriores de arquitetura.
 
@@ -30,11 +30,14 @@ O objetivo do trabalho é transformar uma descrição inicial do sistema em uma 
 │   ├── 02-container-diagram.md
 │   ├── 02-diagram-mermaid.mmd
 │   ├── 02-plant-uml-diagram.puml
-│   └── 02-plant-uml-diagram.png
+│   ├── 02-plant-uml-diagram.png
+│   ├── 03-diagram_sequence_recipe.md
+│   └── 03-plant-uml-sequence-diagram.puml
 │
-└── prompt
+└── prompts
     ├── prompt-01.md
-    └── prompt-02.md
+    ├── prompt-02.md
+    └── prompt-03.md
 ```
 
 ---
@@ -96,19 +99,36 @@ A partir do roteiro revisado foi gerado um diagrama arquitetural de containers r
 
 O objetivo foi demonstrar os principais relacionamentos e dependências do sistema sem detalhar aspectos internos de implementação.
 
-Artefato gerado:
+Artefatos gerados:
 
 ```text
 outputs/02-container-diagram.md
+outputs/02-diagram-mermaid.mmd
+outputs/02-plant-uml-diagram.puml
+```
+
+---
+
+## Etapa 4 - Modelagem Comportamental
+
+Após a definição estrutural da arquitetura, foi criado um diagrama de sequência representando um fluxo típico de execução de uma receita de inspeção.
+
+O objetivo desta etapa foi complementar a visão estática dos containers com uma visão dinâmica das interações entre os principais elementos do sistema.
+
+Artefatos gerados:
+
+```text
+outputs/03-diagram_sequence_recipe.md
+outputs/03-plant-uml-sequence-diagram.puml
 ```
 
 ---
 
 # Diagramas
 
-## Visão Geral de Containers
+## Diagramas Estruturais
 
-### Mermaid
+### Container Diagram (Mermaid)
 
 Arquivo fonte:
 
@@ -116,44 +136,7 @@ Arquivo fonte:
 outputs/02-diagram-mermaid.mmd
 ```
 
-```mermaid
-flowchart LR
-    USER["<external>Analista / Integrador"]
-    UI["Vision Engine UI"]
-    CORE["Vision Engine Core"]
-    PROC["Processing Engine"]
-
-    DB[("Configuration Database")]
-    STORAGE["Local Storage"]
-
-    CAMERAS["<external> Câmeras Industriais"]
-    PLC["<external> CLP"]
-    SUPERVISORY["<external> Aplicação Supervisória"]
-
-    USER -->|Configuração e Monitoramento| UI
-
-    subgraph VE["Vision Engine"]
-    UI -->|Gerencia receitas, configurações e pipelines| CORE
-
-    CORE -->|Ler/Gravar configurações| DB
-
-    CORE -->|Solicita inspeções e executa pipelines| PROC
-end
-    PROC -->|Aquisição de imagens| CAMERAS
-
-    PLC -->|Comandos de inspeção| CORE
-    CORE -->|Resultados e status operacional| PLC
-
-    SUPERVISORY -->|Solicitações| CORE
-    CORE -->|Resultados e status| SUPERVISORY
-
-    CORE -->|Persistência opcional| STORAGE
-    PROC -->|Imagens e evidências| STORAGE
-```
-
-### PlantUML
-
-Durante a atividade também foi realizada uma segunda modelagem utilizando PlantUML com o objetivo de comparar legibilidade, organização visual e facilidade de manutenção entre as duas notações.
+### Container Diagram (PlantUML)
 
 Arquivos:
 
@@ -162,9 +145,31 @@ outputs/02-plant-uml-diagram.puml
 outputs/02-plant-uml-diagram.png
 ```
 
-Imagem renderizada:
+Foi criada também uma versão em PlantUML para comparar legibilidade, organização visual e manutenção em relação à versão Mermaid.
 
-outputs/02-plant-uml-diagram.png
+---
+
+## Diagramas Comportamentais
+
+### Sequence Diagram (Mermaid)
+
+Arquivo:
+
+```text
+outputs/03-diagram_sequence_recipe.md
+```
+
+Representa o fluxo principal de execução de uma receita de inspeção no Vision Engine.
+
+### Sequence Diagram (PlantUML)
+
+Arquivo:
+
+```text
+outputs/03-plant-uml-sequence-diagram.puml
+```
+
+Foi mantido para comparação entre as notações e para documentação arquitetural complementar.
 
 ---
 
@@ -216,6 +221,17 @@ A comunicação com CLPs foi representada como bidirecional:
 
 Os protocolos específicos permaneceram fora do escopo.
 
+## Comparação entre Notações
+
+Durante a atividade foram produzidas versões equivalentes dos diagramas utilizando Mermaid e PlantUML.
+
+Observações registradas:
+
+- Para diagramas de containers, a versão PlantUML apresentou melhor organização visual.
+- Para diagramas de sequência, Mermaid e PlantUML apresentaram resultados equivalentes em clareza.
+- Mermaid facilita a visualização direta em plataformas compatíveis com Markdown.
+- PlantUML foi mantido como alternativa para documentação arquitetural.
+
 ---
 
 # Lacunas Permanecem em Aberto
@@ -239,11 +255,12 @@ As próximas etapas de evolução arquitetural deverão incluir:
 
 1. Discovery de Componentes.
 2. Modelagem de Componentes.
-3. Modelagem de Integrações.
-4. Definição de Persistência.
-5. Modelagem de Implantação.
-6. Definição de Requisitos Não Funcionais.
-7. Estratégia de Observabilidade e Operação 24x7.
-8. Evolução para uma arquitetura de referência do produto.
+3. Fluxos comportamentais adicionais.
+4. Modelagem de Integrações.
+5. Definição de Persistência.
+6. Modelagem de Implantação.
+7. Definição de Requisitos Não Funcionais.
+8. Estratégia de Observabilidade e Operação 24x7.
+9. Evolução para uma arquitetura de referência do produto.
 
 ---
