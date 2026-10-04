@@ -1,0 +1,39 @@
+@startuml
+
+title Vision Engine - Container Diagram
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+rectangle "Vision Engine UI" <<Container>> as UI
+rectangle "Vision Engine Core" <<Container>> as CORE
+rectangle "Processing Engine" <<Container>> as PROC
+
+database "Configuration Database" <<Container>> as DB
+folder "Local Storage" <<Container>> as STORAGE
+
+rectangle "Câmeras Industriais" <<external>> as CAMERAS
+rectangle "CLP" <<external>> as PLC
+rectangle "Aplicação Supervisória" <<external>> as SUPERVISORY
+actor "Analista / Integrador" <<external>> as USER
+
+USER --> UI : Configuração\nMonitoramento
+
+UI --> CORE : Gerencia receitas\nConfigurações\nPipelines
+
+CORE --> DB : Ler/Gravar configurações
+
+CORE --> PROC : Solicita inspeções\nExecuta pipelines
+
+PROC --> CAMERAS : Aquisição de imagens
+
+PLC --> CORE : Comandos de inspeção
+CORE --> PLC : Resultados\nStatus operacional
+
+SUPERVISORY --> CORE : Solicitações
+CORE --> SUPERVISORY : Resultados\nStatus
+
+CORE --> STORAGE : Persistência opcional
+PROC --> STORAGE : Imagens e evidências
+
+@enduml

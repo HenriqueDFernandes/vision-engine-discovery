@@ -1,0 +1,74 @@
+@startuml
+title Criação de Receita e Ajuste de Brilho da Câmera
+
+actor Operador
+participant "Aplicação Supervisória" as Supervisory
+participant "Vision Engine" as VE
+database "Banco de Receitas" as DB
+participant "Câmera Industrial" as Camera
+
+Operador -> Supervisory : Criar receita
+
+Supervisory -> VE : Criar Receita(RequestId, dados)
+
+note right of VE
+Idempotência necessária:
+RequestId deve ser único.
+Evita múltiplas receitas
+caso a aplicação envie retry.
+end note
+
+VE -> DB : Verificar RequestId
+
+alt RequestId já processado
+    DB --> VE : Receita existente
+    VE --> Supervisory : Retornar resultado anterior
+else Nova solicitação
+    DB --> VE : Não encontrado
+
+    VE -> DB : Salvar Receita(RequestId)
+    DB --> VE : Receita salva
+
+    Operador -> Supervisory : Ajustar brilho
+
+    Supervisory -> VE : Ajustar brilho(RequestId, CameraId, Valor)
+
+    note right of VE
+    Idempotência necessária:
+    O mesmo ajuste pode ser
+    reenviado após timeout.
+    Necessário evitar múltiplas
+    atualizações inconsistentes.
+    end note
+
+    VE -> Camera : Configurar brilho
+
+    alt Sucesso
+        Camera --> VE : Confirmação
+
+        VE -> Camera : Capturar imagem teste
+        Camera --> VE : Imagem
+
+        VE -> DB : Atualizar receita validada
+        DB --> VE : OK
+
+        VE --> Supervisory : Receita criada e validada
+
+    else Timeout do provedor
+        Camera --x VE : Sem resposta
+
+        VE -> DB : Registrar falha operacional
+        DB --> VE : OK
+
+        VE --> Supervisory : Erro de timeout
+
+        note right of Supervisory
+        Retry permitido.
+        RequestId impede
+        duplicação da receita.
+        end note
+
+    end
+end
+
+@enduml

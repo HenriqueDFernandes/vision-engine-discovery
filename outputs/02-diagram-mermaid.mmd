@@ -1,0 +1,34 @@
+flowchart LR
+    USER["<external>Analista / Integrador"]
+    UI["Vision Engine UI"]
+    CORE["Vision Engine Core"]
+    PROC["Processing Engine"]
+
+    DB[("Configuration Database")]
+    STORAGE["Local Storage"]
+
+    CAMERAS["<external> Câmeras Industriais"]
+    PLC["<external> CLP"]
+    SUPERVISORY["<external> Aplicação Supervisória"]
+
+    USER -->|Configuração e Monitoramento| UI
+
+    subgraph VE["Vision Engine"]
+       
+   
+    UI -->|Gerencia receitas, configurações e pipelines| CORE
+
+    CORE -->|Ler/Gravar configurações| DB
+
+    CORE -->|Solicita inspeções e executa pipelines| PROC
+ end
+    PROC -->|Aquisição de imagens| CAMERAS
+
+    PLC -->|Comandos de inspeção| CORE
+    CORE -->|Resultados e status operacional| PLC
+
+    SUPERVISORY -->|Solicitações| CORE
+    CORE -->|Resultados e status| SUPERVISORY
+
+    CORE -->|Persistência opcional| STORAGE
+    PROC -->|Imagens e evidências| STORAGE
